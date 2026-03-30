@@ -1,0 +1,56 @@
+# =============================================================================
+# MEDIUM CONSTELLATION — Moderate-scale multi-satellite benchmark
+# =============================================================================
+#
+# Scenario: Walker 12/4/3 (12 sats, 4 planes, 3 per plane), 300 targets
+#
+# Design rationale:
+#   Storage ceiling  = 12 × (120 / 10) = 144 images
+#   Oversubscription = 300 / 144 = 2.08  (moderate challenge)
+#   Expected coverage: 40–55 %
+#
+# This scenario targets the "medium difficulty" regime widely used in
+# multi-satellite studies (He et al. 2019, Ma et al. 2021).
+# Temporal conflicts dominate over storage at this scale:
+#   - Multiple satellites compete for the same high-priority targets.
+#   - Greedy's myopic window selection causes notable missed opportunities.
+#   - Genetic can exploit the richer feasible solution space.
+# =============================================================================
+
+simulation:
+  satellites: 12
+  targets: 300
+  target_mode: random
+  duration: 86400
+  seed: null
+  vizard: false
+
+constellation:
+  num_planes: 4         # Walker 12/4/3: 4 planes × 3 sats per plane
+  altitude_km: 550.0
+  inclination_deg: 53.0
+
+satellite_resources:
+  # 12 images/sat × 12 sats = 144 total  ←  300 targets: OR = 2.08
+  storage_capacity_mbits: 120.0
+  image_size_mbits: 10.0
+  slew_time_sec: 30.0
+  imaging_time_sec: 10.0
+  max_roll_angle_deg: 45.0
+  sensor_fov_deg: 2.5
+
+algorithms:
+  run: both
+  greedy:
+    enabled: true
+  genetic:
+    enabled: true
+    # sqrt(300) × 10 ≈ 173; rounded to 150
+    population_size: 150
+    num_generations: 300
+    mutation_rate: 0.12   # Lower mutation: larger search space needs more directed search
+
+output:
+  save_plots: true
+  plot_format: png
+  results_dir: res/runs/medium_constellation

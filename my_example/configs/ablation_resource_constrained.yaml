@@ -1,0 +1,62 @@
+# =============================================================================
+# RESOURCE CONSTRAINED — Ablation study: storage as primary bottleneck
+# =============================================================================
+#
+# Scenario: Walker 6/3/2, 150 targets — IDENTICAL to default.yaml EXCEPT
+#           storage is cut from 100 Mbits to 50 Mbits per satellite.
+#
+# Design rationale:
+#   Storage ceiling  = 6 × (50 / 10) = 30 images
+#   Oversubscription = 150 / 30 = 5.0  (very hard — storage is dominant)
+#   Expected coverage: 15–25 %
+#
+# EXPERIMENTAL PURPOSE:
+#   Compare results against default.yaml (same constellation, same targets)
+#   to isolate the effect of storage capacity on algorithm performance.
+#
+#   Hypothesis: when storage is the primary bottleneck, the priority-ordering
+#   of selected tasks matters far more, and genetic should outperform greedy
+#   by a larger margin than in the default (OR=2.5) case.
+#
+# Run both together with:
+#   python main.py --config configs/default.yaml
+#   python main.py --config configs/resource_constrained.yaml
+# =============================================================================
+
+simulation:
+  satellites: 6         # Identical to default
+  targets: 150          # Identical to default
+  target_mode: random
+  duration: 86400
+  seed: null              # Same seed → same target positions as default
+  vizard: false
+
+constellation:
+  num_planes: 3         # Walker 6/3/2 — identical to default
+  altitude_km: 550.0
+  inclination_deg: 53.0
+
+satellite_resources:
+  # KEY DIFFERENCE: 50 Mbits → 5 images/sat × 6 sats = 30 total
+  # Versus default: 100 Mbits → 10 images/sat × 6 sats = 60 total
+  storage_capacity_mbits: 50.0
+  image_size_mbits: 10.0
+  slew_time_sec: 30.0
+  imaging_time_sec: 10.0
+  max_roll_angle_deg: 45.0
+  sensor_fov_deg: 2.5
+
+algorithms:
+  run: both
+  greedy:
+    enabled: true
+  genetic:
+    enabled: true
+    population_size: 120
+    num_generations: 200
+    mutation_rate: 0.15
+
+output:
+  save_plots: true
+  plot_format: png
+  results_dir: res/runs/resource_constrained

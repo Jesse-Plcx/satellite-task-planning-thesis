@@ -1,0 +1,22 @@
+# Python cache
+__pycache__/
+*.py[cod]
+
+# Editor / OS files
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Large local Basilisk runtime/source directories
+dist3/
+src/
+supportData/
+
+# Experiment outputs
+my_example/res/runs/
+my_example/res/viz/
+my_example/res/multiseed/
+
+# Local temporary files
+*.log
+*.tmp

@@ -1,0 +1,64 @@
+# =============================================================================
+# DEFAULT CONFIGURATION — Standard Multi-Satellite EOS Scheduling Benchmark
+# =============================================================================
+#
+# Scenario: Walker 6/3/2 constellation (6 sats, 3 planes, 2 per plane)
+#           observing 150 random targets over 24 h.
+#
+# Design rationale (Problem 4 fix):
+#   Storage ceiling  = 6 sats × (100 Mbits / 10 Mbits) = 60 images
+#   Oversubscription = 150 targets / 60 slots = 2.5
+#   → Storage IS a binding constraint; expected coverage 35–50 %.
+#   → Both greedy and genetic must prioritise — the problem is non-trivial.
+#
+# Reference baseline for EOS scheduling studies:
+#   Ma et al. (2021); He et al. (2019); Gabrel & Murat (2003)
+# =============================================================================
+
+simulation:
+  satellites: 6         # Walker T=6 constellation
+  targets: 150          # Oversubscription ratio 2.5 — storage is binding
+  target_mode: random   # Uniformly random over ±60° latitude
+  duration: 86400       # 1 sidereal day [s]
+  seed: null              # Reproducible target positions
+  vizard: false         # Disable for faster batch runs (enable manually)
+
+constellation:
+  num_planes: 3         # Walker 6/3/2: 3 planes × 2 sats per plane
+  altitude_km: 550.0    # LEO — same altitude as Starlink shell 1
+  inclination_deg: 53.0 # Covers ±53° latitude (most populated regions)
+
+satellite_resources:
+  storage_capacity_mbits: 100.0
+  image_size_mbits: 10.0
+  slew_time_sec: 30.0   # Agile satellite attitude manoeuvre time
+  imaging_time_sec: 10.0
+  max_roll_angle_deg: 45.0
+  sensor_fov_deg: 2.5   # Narrow FOV pushes slew angle utilisation
+
+algorithms:
+  run: both
+  random:
+    enabled: true
+  ewf:
+    enabled: true
+  greedy:
+    enabled: true
+  sa:
+    enabled: true
+    initial_temperature: null   # Auto-calibrated from sampled downhill moves
+    final_temperature: 0.05
+    cooling_rate: 0.97
+    iterations_per_temp: 40
+  genetic:
+    enabled: true
+    # Population guidance: ≈ sqrt(targets) × 10 → ~122; rounded to 120
+    population_size: 120
+    # Generations: empirical convergence for EOS problems at this scale
+    num_generations: 200
+    mutation_rate: 0.15
+
+output:
+  save_plots: true
+  plot_format: png
+  results_dir: res/runs/default

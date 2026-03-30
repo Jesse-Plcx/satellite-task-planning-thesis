@@ -1,0 +1,60 @@
+# =============================================================================
+# HIGH-AGILITY — Satellite capability ablation: fast vs slow slew
+# =============================================================================
+#
+# Scenario: Walker 6/3/2, 150 targets — IDENTICAL to default.yaml EXCEPT
+#           slew_time is halved (30 s → 15 s), simulating a high-agility bus.
+#
+# Design rationale:
+#   Storage ceiling  = 6 × (100 / 10) = 60 images  (same as default)
+#   Oversubscription = 150 / 60 = 2.5  (same as default)
+#
+# EXPERIMENTAL PURPOSE:
+#   Compare with default.yaml to measure the *value of agility*.
+#   With faster slewing, previously infeasible windows become accessible —
+#   especially short windows immediately after another task.
+#
+#   Expected result: coverage increases modestly for greedy (it can exploit
+#   nearby sequential windows); genetic benefits more because it can now
+#   construct denser, conflict-free schedules.
+#
+# Run as an ablation pair:
+#   python main.py --config configs/default.yaml
+  #   python main.py --config configs/ablation_high_agility.yaml
+# =============================================================================
+
+simulation:
+  satellites: 6
+  targets: 150
+  target_mode: random
+  duration: 86400
+  seed: null              # Same seed → same targets as default, comparable results
+  vizard: false
+
+constellation:
+  num_planes: 3         # Walker 6/3/2 — identical to default
+  altitude_km: 550.0
+  inclination_deg: 53.0
+
+satellite_resources:
+  storage_capacity_mbits: 100.0
+  image_size_mbits: 10.0
+  slew_time_sec: 15.0   # KEY DIFFERENCE: half the default slew time
+  imaging_time_sec: 10.0
+  max_roll_angle_deg: 45.0
+  sensor_fov_deg: 2.5
+
+algorithms:
+  run: both
+  greedy:
+    enabled: true
+  genetic:
+    enabled: true
+    population_size: 120
+    num_generations: 200
+    mutation_rate: 0.15
+
+output:
+  save_plots: true
+  plot_format: png
+  results_dir: res/runs/ablation_high_agility

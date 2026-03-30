@@ -1,0 +1,60 @@
+# =============================================================================
+# LARGE CONSTELLATION — Availability-limited large-scale benchmark
+# =============================================================================
+#
+# Scenario: Walker 24/6/4 (24 sats, 6 planes, 4 per plane), 500 targets
+#
+# Design rationale:
+#   Storage ceiling  = 24 × (150 / 10) = 360 images
+#   Oversubscription = 500 / 360 = 1.39
+#   Expected coverage: 55–75 %
+#
+# At this scale storage is no longer the primary bottleneck — temporal
+# availability limits coverage.  Targets in poor orbital geometry (low
+# elevation, narrow windows) may simply have no reachable window regardless
+# of scheduling policy.  The experiment tests whether genetic can find better
+# satellite-to-target assignments than greedy when the solution space is large
+# but solutions of similar quality are abundant.
+#
+# NOTE: This scenario is computationally expensive.
+#   Genetic runtime estimate: ≈ 45–90 min on a typical workstation.
+#   Set vizard: false and use --algorithm greedy for a quick sanity check.
+# =============================================================================
+
+simulation:
+  satellites: 24
+  targets: 500
+  target_mode: random
+  duration: 86400
+  seed: null
+  vizard: false
+
+constellation:
+  num_planes: 6         # Walker 24/6/4: 6 planes × 4 sats per plane
+  altitude_km: 550.0
+  inclination_deg: 53.0
+
+satellite_resources:
+  # 15 images/sat × 24 sats = 360 total  ←  500 targets: OR = 1.39
+  storage_capacity_mbits: 150.0
+  image_size_mbits: 10.0
+  slew_time_sec: 30.0
+  imaging_time_sec: 10.0
+  max_roll_angle_deg: 45.0
+  sensor_fov_deg: 2.5
+
+algorithms:
+  run: both
+  greedy:
+    enabled: true
+  genetic:
+    enabled: true
+    # sqrt(500) × 10 ≈ 224; rounded to 200
+    population_size: 200
+    num_generations: 650
+    mutation_rate: 0.10
+
+output:
+  save_plots: true
+  plot_format: png
+  results_dir: res/runs/large
