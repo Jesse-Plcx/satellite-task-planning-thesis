@@ -18,7 +18,8 @@ my_example/res/viz/
 my_example/res/multiseed/
 
 # Experiment docs / reports (keep local, do not upload)
-my_example/reports/
+**/report/
+**/reports/
 my_example/THESIS_EXPERIMENT_PLAN.md
 
 # Local temporary files
