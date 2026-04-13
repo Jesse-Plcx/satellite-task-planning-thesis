@@ -78,13 +78,13 @@ def greedy_task_planning(accessWindows, targetList, satResources, numSatellites,
                 continue
             
             time_to_start = actual_start - earliest_start
-            time_half_life = 1800.0
+            time_decay = 1800.0  # τ_d: value halves when wait equals this
 
             estimated_elev_rad = estimate_midpoint_elevation(task, sat, actual_start)
             elevation_deg = np.degrees(estimated_elev_rad)
             elevation_bonus = 0.3 * min(elevation_deg / 90.0, 1.0)
 
-            value = (task['priority'] + elevation_bonus) / (1 + time_to_start / time_half_life)
+            value = (task['priority'] + elevation_bonus) / (1 + time_to_start / time_decay)
             
             if value > best_value:
                 best_value = value

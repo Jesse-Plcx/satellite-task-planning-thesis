@@ -160,8 +160,8 @@ class ConfigLoader:
         
         # Validate algorithm parameters
         algo = config.get('algorithms', {})
-        if algo.get('run') not in ['random', 'ewf', 'greedy', 'sa', 'genetic', 'both', 'all']:
-            raise ValueError("algorithms.run must be 'random', 'ewf', 'greedy', 'sa', 'genetic', 'both', or 'all'")
+        if algo.get('run') not in ['random', 'ewf', 'greedy', 'sa', 'genetic', 'both', 'all', 'all_no_ga']:
+            raise ValueError("algorithms.run must be 'random', 'ewf', 'greedy', 'sa', 'genetic', 'both', 'all', or 'all_no_ga'")
 
         sa = algo.get('sa', {})
         if sa.get('final_temperature', 0) <= 0:
