@@ -41,8 +41,18 @@ satellite_resources:
 
 algorithms:
   run: both
+  random:
+    enabled: true
+  ewf:
+    enabled: true
   greedy:
     enabled: true
+  sa:
+    enabled: true
+    initial_temperature: null
+    final_temperature: 0.05
+    cooling_rate: 0.97
+    iterations_per_temp: 40
   genetic:
     enabled: true
     # sqrt(300) × 10 ≈ 173; rounded to 150

@@ -95,7 +95,7 @@ def run_algorithm(algorithmName, accessWindows, targetList, satResources,
     covered_count, total_value, avg_elev_deg = evaluate_schedule(
         targetListCopy, satResourcesCopy, numSatellites, duration
     )
-    print(f"Execution time: {elapsedTime:.2f} seconds\n")
+    print(f"M4 Runtime: {elapsedTime:.2f} seconds\n")
     
     result_dir = plot_task_planning_results(targetListCopy, satResourcesCopy, numSatellites, 
                                             duration, algorithmName=display_name,
@@ -125,6 +125,9 @@ Examples:
 
   # Full comparison: Random + EWF + Improved Greedy + SA + Genetic
   python main.py --satellites 18 --targets 100 --algorithm all
+
+  # Non-GA comparison: Random + EWF + Improved Greedy + SA
+  python main.py --satellites 18 --targets 100 --algorithm all_no_ga
         """
     )
     
@@ -134,7 +137,7 @@ Examples:
     
     # Algorithm selection
     parser.add_argument('--algorithm', type=str, default=None,
-                       choices=['random', 'ewf', 'greedy', 'sa', 'genetic', 'both', 'all'],
+                       choices=['random', 'ewf', 'greedy', 'sa', 'genetic', 'both', 'all', 'all_no_ga'],
                        help='Algorithm to run (overrides config)')
     
     # Simulation parameters (override config)
@@ -322,7 +325,7 @@ Examples:
     results = {}
     algorithm_to_run = algo_config['run']
     
-    if algorithm_to_run in ['random', 'all']:
+    if algorithm_to_run in ['random', 'all', 'all_no_ga']:
         (targetListRandom, satResourcesRandom, timeRandom, output_dir,
          covered_random, value_random, elev_random) = run_algorithm(
             'random', accessWindows, targetList, satResources,
@@ -336,7 +339,7 @@ Examples:
             'time': timeRandom
         }
 
-    if algorithm_to_run in ['ewf', 'all']:
+    if algorithm_to_run in ['ewf', 'all', 'all_no_ga']:
         (targetListEWF, satResourcesEWF, timeEWF, output_dir,
          covered_ewf, value_ewf, elev_ewf) = run_algorithm(
             'ewf', accessWindows, targetList, satResources,
@@ -349,7 +352,7 @@ Examples:
             'time': timeEWF
         }
 
-    if algorithm_to_run in ['greedy', 'both', 'all']:
+    if algorithm_to_run in ['greedy', 'both', 'all', 'all_no_ga']:
         (targetListGreedy, satResourcesGreedy, timeGreedy, output_dir,
          covered_greedy, value_greedy, elev_greedy) = run_algorithm(
             'greedy', accessWindows, targetList, satResources,
@@ -362,7 +365,7 @@ Examples:
             'time': timeGreedy
         }
 
-    if algorithm_to_run in ['sa', 'all']:
+    if algorithm_to_run in ['sa', 'all', 'all_no_ga']:
         sa_config = algo_config['sa']
         (targetListSA, satResourcesSA, timeSA, output_dir,
          covered_sa, value_sa, elev_sa) = run_algorithm(
@@ -400,17 +403,19 @@ Examples:
         }
     
     # Print comparison
-    if algorithm_to_run in ['both', 'all']:
+    if algorithm_to_run in ['both', 'all', 'all_no_ga']:
         lines = []
         lines.append("\n" + "="*75)
         if algorithm_to_run == 'both':
             lines.append("MAIN COMPARISON (IMPROVED GREEDY VS GENETIC)")
+        elif algorithm_to_run == 'all_no_ga':
+            lines.append("NON-GA COMPARISON (RANDOM + EWF + IMPROVED GREEDY + SA)")
         else:
             lines.append("FULL COMPARISON (RANDOM + EWF + IMPROVED GREEDY + SA + GENETIC)")
         lines.append("="*75)
         lines.append("="*75)
         lines.append(f"{'Algorithm':<10} {'M1 Task Comp':<18} {'M2 Priority':<14} "
-                     f"{'M3 Avg Elev':<13} {'Time':<8}")
+                     f"{'M3 Avg Elev':<13} {'M4 Runtime':<10}")
         lines.append("-"*75)
         for algo, res in results.items():
             coverage_pct = (res['coverage'] / num_targets) * 100
@@ -475,7 +480,7 @@ Examples:
     print("\n" + "="*70)
     print("RESULTS SAVED")
     print("="*70)
-    if algorithm_to_run in ['both', 'all']:
+    if algorithm_to_run in ['both', 'all', 'all_no_ga']:
         print(f"  Results saved to: {shared_output_dir}")
         print(f"    - Selected algorithm plots and summaries")
     elif algorithm_to_run == 'random':

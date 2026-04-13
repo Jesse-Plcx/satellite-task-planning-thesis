@@ -106,7 +106,7 @@ def write_summary_markdown(path: Path, summary: dict[str, dict], seeds: list[int
         "- Type: `scene-based main experiment`",
         f"- Seeds: `{', '.join(str(s) for s in seeds)}`",
         "",
-        "| Algorithm | Runs | M1 count | M1 rate | M2 | M3 | Time |",
+        "| Algorithm | Runs | M1 count | M1 rate | M2 | M3 | M4 |",
         "| --- | ---: | --- | --- | --- | --- | --- |",
     ]
     for algo, row in summary.items():
@@ -125,7 +125,7 @@ def main() -> int:
     parser.add_argument("--config", type=str, default="configs/default.yaml",
                         help="Path to config file relative to my_example/")
     parser.add_argument("--algorithm", type=str, default="all",
-                        choices=["random", "ewf", "greedy", "sa", "genetic", "both", "all"],
+                        choices=["random", "ewf", "greedy", "sa", "genetic", "both", "all", "all_no_ga"],
                         help="Algorithm set to run in each repetition.")
     parser.add_argument("--seeds", type=str, default="1,2,3,4,5",
                         help="Comma-separated scene seed list. Default: 1,2,3,4,5")

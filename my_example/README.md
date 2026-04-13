@@ -28,8 +28,10 @@ my_example/
 │   └── ablation_resource_constrained.yaml  # 资源限制消融实验
 ├── res/                         # 输出结果根目录
 │   └── runs/                    # 运行结果（按时间戳生成子目录）
-├── reports/                     # 分析/报告文档
-│   ├── KEY_FORMULAS.md          # 关键公式（与代码一致）
+├── reports/                     # 报告与论文材料
+│   ├── ch4/                     # 第四章正式材料
+│   ├── reference/               # 通用参考文档
+│   ├── history/                 # 历史阶段性报告
 │   └── my_example_analysis.md
 └── TODO.md                      # 待办事项
 ```
@@ -170,7 +172,7 @@ python run_multiseed.py --config configs/default.yaml --algorithm all --seeds 1,
 
 ### 改进贪心算法 (Improved Greedy)
 - 策略：每次选择价值最高的任务执行
-- 价值函数：`value = (priority + 0.3 * (elevation_factor - 1)) / (1 + time_to_start / time_half_life)`
+- 价值函数：`value = (priority + 0.3 * (elevation_factor - 1)) / (1 + time_to_start / time_decay)`
 - 仰角因子（基于窗口位置的中间点估算）：
   ```
   t_mid   = actual_start + imaging_time / 2
@@ -180,7 +182,7 @@ python run_multiseed.py --config configs/default.yaml --algorithm all --seeds 1,
   elevation_factor = 1 + min(elev_est_deg / 90, 1)   # ∈ [1.17, 2.0]
   elevation_bonus = 0.3 * (elevation_factor - 1)
   ```
-- 时间半衰期：`time_half_life = 1800.0`（30 分钟）
+- 时间衰减常数：`time_decay = 1800.0`（30 分钟，τ_d）
 - 约束：存储容量、机动时间、成像时间、目标不重复成像
 - 优点：在保持较快速度的同时，兼顾目标优先级、观测质量与等待代价
 - 缺点：仍属于局部最优启发式
@@ -241,7 +243,7 @@ Gantt 图、任务分配与存储利用、任务完成度饼图
 
 ## 关键公式
 
-关键公式与变量说明见 `reports/KEY_FORMULAS.md`（与代码一致）。
+关键公式与变量说明见 `reports/reference/KEY_FORMULAS.md`（与代码一致）。
 
 ## 开发扩展
 
