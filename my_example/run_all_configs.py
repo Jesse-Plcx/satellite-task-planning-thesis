@@ -1,5 +1,5 @@
 """
-Run all config experiments in my_example/configs.
+Run the formal scenario config experiments in my_example/configs.
 
 Usage:
   python run_all_configs.py
@@ -18,9 +18,9 @@ from datetime import datetime
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Run all config experiments.")
+    parser = argparse.ArgumentParser(description="Run formal scenario config experiments.")
     parser.add_argument("--algorithm", type=str, default=None,
-                        choices=["random", "ewf", "greedy", "sa", "genetic", "both", "all"],
+                        choices=["random", "ewf", "greedy", "sa", "genetic", "both", "all", "all_no_ga"],
                         help="Override algorithm for every config.")
     parser.add_argument("--no-show", action="store_true",
                         help="Disable plot windows (uses non-interactive backend).")
@@ -30,10 +30,15 @@ def main():
 
     script_dir = Path(__file__).resolve().parent
     configs_dir = script_dir / "configs"
-    configs = sorted(configs_dir.glob("*.yaml"))
+    formal_order = [
+        "scenario_surplus_30sat_100tar.yaml",
+        "scenario_normal_30sat_400tar.yaml",
+        "scenario_severe_30sat_1000tar.yaml",
+    ]
+    configs = [configs_dir / name for name in formal_order if (configs_dir / name).exists()]
 
     if not configs:
-        print(f"No config files found in {configs_dir}")
+        print(f"No formal scenario config files found in {configs_dir}")
         return 1
 
     print(f"Found {len(configs)} configs:")

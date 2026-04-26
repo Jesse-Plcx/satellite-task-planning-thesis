@@ -1,4 +1,5 @@
 """Genetic algorithm for satellite task planning - Improved version"""
+import csv
 import numpy as np
 import random
 from copy import deepcopy
@@ -501,8 +502,28 @@ def mutate_enhanced(schedule, accessWindows, targetList, satResources, mutationR
                 schedule.genes[idx] = (satId, targetId, new_windowIdx)
 
 
+def _write_generation_history(history_rows, history_path):
+    """Persist GA convergence data for later plotting and paper figures."""
+    if not history_path:
+        return
+
+    fieldnames = [
+        "generation",
+        "best_fitness",
+        "avg_fitness",
+        "std_fitness",
+        "best_coverage",
+        "best_gene_count",
+    ]
+    with open(history_path, "w", newline="", encoding="utf-8") as csvfile:
+        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+        writer.writeheader()
+        writer.writerows(history_rows)
+
+
 def genetic_task_planning(accessWindows, targetList, satResources, numSatellites, numTargets,
-                          popSize=50, numGenerations=100, mutationRate=0.2, eliteSize=3, seed=42):
+                          popSize=50, numGenerations=100, mutationRate=0.2,
+                          eliteSize=3, seed=42, historyPath=None):
     """Improved Genetic Algorithm for satellite task planning"""
     # Fix all random sources so every run with the same seed produces identical results
     random.seed(seed)
@@ -525,7 +546,15 @@ def genetic_task_planning(accessWindows, targetList, satResources, numSatellites
     bestEver = max(population, key=lambda x: x.fitness)
     bestEver = deepcopy(bestEver)
     initial_best_coverage = bestEver.coverage
-    
+    history_rows = [{
+        "generation": 0,
+        "best_fitness": float(bestEver.fitness),
+        "avg_fitness": float(np.mean([ind.fitness for ind in population])),
+        "std_fitness": float(np.std([ind.fitness for ind in population])),
+        "best_coverage": int(bestEver.coverage),
+        "best_gene_count": int(len(bestEver.genes)),
+    }]
+
     print(f"Initial best: {bestEver.coverage}/{numTargets} targets")
     local_search_runs = 0
     local_search_improvements = 0
@@ -576,6 +605,15 @@ def genetic_task_planning(accessWindows, targetList, satResources, numSatellites
             print(f"Gen {generation+1}/{numGenerations}: "
                   f"Best={current_best.coverage}/{numTargets} ({current_best.fitness:.1f}), "
                   f"Avg={avgFitness:.1f}±{stdFitness:.1f}")
+
+        history_rows.append({
+            "generation": generation + 1,
+            "best_fitness": float(current_best.fitness),
+            "avg_fitness": float(np.mean([ind.fitness for ind in population])),
+            "std_fitness": float(np.std([ind.fitness for ind in population])),
+            "best_coverage": int(current_best.coverage),
+            "best_gene_count": int(len(current_best.genes)),
+        })
         
         # Adaptive mutation rate (no stagnation-based boost)
         current_mutation_rate = mutationRate
@@ -630,5 +668,6 @@ def genetic_task_planning(accessWindows, targetList, satResources, numSatellites
     coverage = (covered / len(targetList)) * 100
     print(f"✓ Final coverage: {covered}/{len(targetList)} ({coverage:.1f}%)")
     print(f"✓ Scheduled tasks: {len(bestEver.genes)}")
-    
+    _write_generation_history(history_rows, historyPath)
+
     return None

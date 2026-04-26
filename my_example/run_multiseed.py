@@ -3,7 +3,7 @@ Run the main multi-seed experiment and aggregate summary statistics.
 
 Recommended usage:
   python run_multiseed.py
-  python run_multiseed.py --config configs/default.yaml --algorithm all --seeds 1,2,3,4,5
+  python run_multiseed.py --config configs/scenario_normal_30sat_400tar.yaml --algorithm all --seeds 1,2,3,4,5
 """
 import argparse
 import csv
@@ -122,7 +122,7 @@ def main() -> int:
     parser = argparse.ArgumentParser(
         description="Run the main multi-seed experiment and aggregate results."
     )
-    parser.add_argument("--config", type=str, default="configs/default.yaml",
+    parser.add_argument("--config", type=str, default="configs/scenario_normal_30sat_400tar.yaml",
                         help="Path to config file relative to my_example/")
     parser.add_argument("--algorithm", type=str, default="all",
                         choices=["random", "ewf", "greedy", "sa", "genetic", "both", "all", "all_no_ga"],

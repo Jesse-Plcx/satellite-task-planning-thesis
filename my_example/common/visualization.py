@@ -162,8 +162,9 @@ def plot_task_planning_results(targetList, satResources, numSatellites, duration
         bbox_inches='tight'
     )
     
-    # Non-blocking show so batch runs can continue
-    plt.show(block=False)
-    plt.pause(0.1)
-    
+    # Non-blocking show so batch runs can continue, but skip it in headless runs.
+    if "agg" not in plt.get_backend().lower():
+        plt.show(block=False)
+        plt.pause(0.1)
+
     return output_dir

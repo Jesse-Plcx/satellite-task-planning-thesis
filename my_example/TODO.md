@@ -1,33 +1,39 @@
 # TODO（my_example）
 
-本文档只保留当前还没有真正闭环的事项，优先服务两件事：
+本文档仅记录当前正式实验口径下仍需闭环的事项。旧版 `small/default/medium/large/ablation_*` 实验已转入历史归档，不再作为论文正式结论依据。
 
-1. 提高实验结论的统计可信度。
-2. 补齐论文定稿前仍缺的实验支撑与复现材料。
+## 1. 当前正式实验口径
 
-## 1. 当前优先事项
+固定条件：
+
+- 卫星数：30
+- 单星理论容量：20 个目标/天
+- 星座理论总容量：600 个目标/天
+- 仿真时长：1 天
+- 统计种子：`1,2,3,4,5`
+- 正式配置：`configs/scenario_surplus_30sat_100tar.yaml`、`configs/scenario_normal_30sat_400tar.yaml`、`configs/scenario_severe_30sat_1000tar.yaml`
+
+## 2. 当前优先事项
 
 | 优先级 | 事项 | 当前判断 | 下一步建议 |
 | --- | --- | --- | --- |
-| P0 | 时间冲突主导场景 | 现有配置大多仍是存储约束主导，M1 区分度偏弱 | 新增一组窗口更密、冲突更强的配置 |
-| P1 | 收敛记录落盘 | 目前只在控制台每隔若干代打印一次 | 保存每代 `best / avg / std fitness` 到 CSV |
-| P1 | 强化大规模耗时结论表述 | `large` 场景下 GA 耗时远高于轻量启发式方法 | 在论文中明确写出 `14172 s`、`3.94 h`、`633x` 的对比结论 |
-| P1 | 复现说明补全 | 配置文件和 seed 已有入口，但代码版本、环境、命令口径还没统一沉淀 | 在报告模板中固定记录 config / seed / commit / env / output_dir |
-| P1 | 模型边界与局限 | 相关说明分散在 README 和实验报告中 | 单独整理“假设与局限”小节 |
-| P2 | 少量超参数敏感性分析 | 参数已有经验值，但缺少压缩版证据 | 选 1 到 2 个关键参数做小规模敏感性实验 |
+| P0 | 三类场景多 seed 正式运行 | 配置已确定，旧结果不再复用 | 按资源富余、正常冲突、严重冲突顺序执行 |
+| P0 | 严重冲突 GA 长任务管理 | 1000 目标下 GA 耗时较高但实验室资源充足 | 拆成 `all_no_ga` 和 `genetic`，均使用 5 seeds |
+| P1 | 第四章图表重生成 | 旧图表已隔离为历史材料 | 新结果完成后重新生成 `reports/ch4/assets/` |
+| P1 | 论文表述统一 | 旧 large/default 结论不再进入正文 | 统一改为三类任务压力对比 |
+| P2 | 假设与局限整理 | 理论容量不等于实际可完成数 | 在第四章说明可见窗口和机动约束的影响 |
 
-## 2. 最建议先完成的 5 件事
+## 3. 推荐执行命令
 
-1. 保存 GA 每代收敛曲线数据，便于画图和解释。
-2. 在论文中强化 `large` 场景下 `14172 s / 3.94 h / 633x` 的时间代价结论。
-3. 新增一组“时间窗冲突主导”配置，增强 M1 区分度。
-4. 统一论文中的复现说明、假设与局限表述。
-5. 选 1 到 2 个关键超参数做小规模敏感性实验。
+```powershell
+python run_multiseed.py --config configs/scenario_surplus_30sat_100tar.yaml --algorithm all --seeds 1,2,3,4,5
+python run_multiseed.py --config configs/scenario_normal_30sat_400tar.yaml --algorithm all --seeds 1,2,3,4,5
+python run_multiseed.py --config configs/scenario_severe_30sat_1000tar.yaml --algorithm all_no_ga --seeds 1,2,3,4,5
+python run_multiseed.py --config configs/scenario_severe_30sat_1000tar.yaml --algorithm genetic --seeds 1,2,3,4,5
+```
 
-## 3. 当前结论边界
+## 4. 旧材料处理
 
-- 现有代码结构和报告框架已经基本够用，短板主要不在“缺算法”，而在“缺统计闭环”。
-- `default` 场景下五算法 5-seed 主实验已经完成，结果可直接作为主表统计依据。
-- `large` 场景下 GA 的超长耗时应作为论文结论证据保留，而不是优先继续工程优化。
-- `fitness` 与 `M1/M2/M3` 的关系、五算法口径、配置摘要已经有文档承接，不再作为最高优先级 TODO。
-- 后续开发应优先服务论文可信度，而不是继续扩展功能数量。
+- 旧配置已保留在 `configs/legacy/`。
+- 旧实验结果仍保留在 `res/`。
+- 旧第四章图表和索引应只作为历史材料，不再支撑最终结论。

@@ -5,6 +5,9 @@ import argparse
 import time
 import os
 import json
+import platform
+import subprocess
+import sys
 from copy import deepcopy
 from datetime import datetime
 
@@ -32,7 +35,20 @@ DISPLAY_NAMES = {
 }
 
 
-def run_algorithm(algorithmName, accessWindows, targetList, satResources, 
+def safe_git_output(args, cwd):
+    """Return git metadata when available without failing the run."""
+    try:
+        return subprocess.check_output(
+            ["git", *args],
+            cwd=cwd,
+            text=True,
+            stderr=subprocess.DEVNULL
+        ).strip()
+    except Exception:
+        return "unknown"
+
+
+def run_algorithm(algorithmName, accessWindows, targetList, satResources,
                   numSatellites, numTargets, duration, output_dir=None, **kwargs):
     """Run specified algorithm and visualize results
     
@@ -83,10 +99,12 @@ def run_algorithm(algorithmName, accessWindows, targetList, satResources,
         numGenerations = kwargs.get('numGenerations', 100)
         mutationRate = kwargs.get('mutationRate', 0.1)
         seed = kwargs.get('seed', 42)
+        historyPath = kwargs.get('historyPath')
         genetic_task_planning(accessWindows, targetListCopy, satResourcesCopy,
                             numSatellites, numTargets,
                             popSize=popSize, numGenerations=numGenerations,
-                            mutationRate=mutationRate, seed=seed)
+                            mutationRate=mutationRate, seed=seed,
+                            historyPath=historyPath)
     else:
         raise ValueError(f"Unknown algorithm: {algorithmName}")
     
@@ -111,14 +129,16 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  # Use default configuration
+  # Use formal normal-conflict configuration
   python main.py
   
-  # Use a config file
-  python main.py --config configs/small.yaml
+  # Use final thesis scenario configs
+  python main.py --config configs/scenario_surplus_30sat_100tar.yaml
+  python main.py --config configs/scenario_normal_30sat_400tar.yaml
+  python main.py --config configs/scenario_severe_30sat_1000tar.yaml
   
   # Use config file and override parameters
-  python main.py --config configs/default.yaml --satellites 12 --targets 50
+  python main.py --config configs/scenario_normal_30sat_400tar.yaml --targets 500
   
   # Main comparison: Improved Greedy vs Genetic
   python main.py --satellites 18 --targets 100 --algorithm both
@@ -287,6 +307,10 @@ Examples:
     runs_dir = os.path.join(script_dir, 'res', 'runs')
     shared_output_dir = os.path.join(runs_dir, folder_name)
     os.makedirs(shared_output_dir, exist_ok=True)
+    repo_root = os.path.dirname(script_dir)
+    git_commit = safe_git_output(["rev-parse", "HEAD"], repo_root)
+    git_branch = safe_git_output(["rev-parse", "--abbrev-ref", "HEAD"], repo_root)
+    command_line = subprocess.list2cmdline([sys.executable, *sys.argv])
 
     # Write run summary (configuration + visibility criteria) to a txt file
     summary_path = os.path.join(shared_output_dir, "run_summary.txt")
@@ -303,6 +327,16 @@ Examples:
         f.write(f"Walker planes: {const_config['num_planes']}\n")
         f.write(f"Altitude: {const_config['altitude_km']} km\n")
         f.write(f"Inclination: {const_config['inclination_deg']}°\n")
+        f.write("\n")
+        f.write("REPRODUCIBILITY METADATA\n")
+        f.write("="*60 + "\n")
+        f.write(f"Timestamp:              {datetime.now().isoformat(timespec='seconds')}\n")
+        f.write(f"Output directory:       {shared_output_dir}\n")
+        f.write(f"Command:                {command_line}\n")
+        f.write(f"Python executable:      {sys.executable}\n")
+        f.write(f"Python version:         {platform.python_version()}\n")
+        f.write(f"Git branch:             {git_branch}\n")
+        f.write(f"Git commit:             {git_commit}\n")
         f.write("\n")
         f.write("VISIBILITY CRITERIA & CONSTRAINTS\n")
         f.write("="*60 + "\n")
@@ -393,7 +427,8 @@ Examples:
             popSize=genetic_config['population_size'],
             numGenerations=genetic_config['num_generations'],
             mutationRate=genetic_config['mutation_rate'],
-            seed=seed
+            seed=seed,
+            historyPath=os.path.join(shared_output_dir, "genetic_convergence.csv")
         )
         results['genetic'] = {
             'coverage': covered_genetic,
@@ -461,6 +496,11 @@ Examples:
         'num_satellites': num_satellites,
         'num_targets': num_targets,
         'duration_sec': duration,
+        'python_executable': sys.executable,
+        'python_version': platform.python_version(),
+        'git_branch': git_branch,
+        'git_commit': git_commit,
+        'command': command_line,
         'results': {}
     }
     for algo, res in results.items():

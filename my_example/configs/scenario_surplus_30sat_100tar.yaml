@@ -1,0 +1,60 @@
+# =============================================================================
+# RESOURCE SURPLUS SCENARIO -- 30 satellites, 100 targets
+# =============================================================================
+#
+# Final thesis experiment configuration.
+#
+# Fixed capacity setting:
+#   30 satellites x 20 images/satellite/day = 600 images/day
+#   storage_capacity_mbits / image_size_mbits = 200 / 10 = 20
+#
+# Scenario pressure:
+#   100 targets / 600 image capacity = 0.167
+#   Resources are far greater than target demand.
+# =============================================================================
+
+simulation:
+  satellites: 30
+  targets: 100
+  target_mode: random
+  duration: 86400
+  seed: null
+  vizard: false
+
+constellation:
+  num_planes: 6
+  altitude_km: 550.0
+  inclination_deg: 53.0
+
+satellite_resources:
+  storage_capacity_mbits: 200.0
+  image_size_mbits: 10.0
+  slew_time_sec: 30.0
+  imaging_time_sec: 10.0
+  max_roll_angle_deg: 45.0
+  sensor_fov_deg: 2.5
+
+algorithms:
+  run: all
+  random:
+    enabled: true
+  ewf:
+    enabled: true
+  greedy:
+    enabled: true
+  sa:
+    enabled: true
+    initial_temperature: null
+    final_temperature: 0.05
+    cooling_rate: 0.97
+    iterations_per_temp: 60
+  genetic:
+    enabled: true
+    population_size: 120
+    num_generations: 200
+    mutation_rate: 0.15
+
+output:
+  save_plots: true
+  plot_format: png
+  results_dir: res/runs/scenario_surplus_30sat_100tar

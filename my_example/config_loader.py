@@ -12,20 +12,20 @@ class ConfigLoader:
     
     DEFAULT_CONFIG = {
         'simulation': {
-            'satellites': 6,
-            'targets': 150,
+            'satellites': 30,
+            'targets': 400,
             'target_mode': 'random',
             'duration': 86400.0,
             'seed': None,
             'vizard': False
         },
         'constellation': {
-            'num_planes': 3,
+            'num_planes': 6,
             'altitude_km': 550.0,
             'inclination_deg': 53.0
         },
         'satellite_resources': {
-            'storage_capacity_mbits': 100.0,
+            'storage_capacity_mbits': 200.0,
             'image_size_mbits': 10.0,
             'slew_time_sec': 30.0,
             'imaging_time_sec': 10.0,
@@ -49,20 +49,20 @@ class ConfigLoader:
                 'enabled': True,
                 'initial_temperature': None,
                 'final_temperature': 0.05,
-                'cooling_rate': 0.97,
-                'iterations_per_temp': 40
+                'cooling_rate': 0.975,
+                'iterations_per_temp': 250
             },
             'genetic': {
                 'enabled': True,
-                'population_size': 120,
-                'num_generations': 200,
-                'mutation_rate': 0.15
+                'population_size': 220,
+                'num_generations': 350,
+                'mutation_rate': 0.12
             }
         },
         'output': {
             'save_plots': True,
             'plot_format': 'png',
-            'results_dir': 'res/runs/default'
+            'results_dir': 'res/runs/scenario_normal_30sat_400tar'
         }
     }
     
@@ -71,23 +71,25 @@ class ConfigLoader:
         """
         Load configuration from YAML file
 
-        When config_path is None, automatically loads configs/default.yaml
-        (relative to this file's directory) so that running without --config
-        gives identical results to --config configs/default.yaml.
+        When config_path is None, automatically loads the formal normal-conflict
+        scenario in configs/scenario_normal_30sat_400tar.yaml (relative to this
+        file's directory) so that running without --config gives identical
+        results to that scenario file.
         The hardcoded DEFAULT_CONFIG is used only if that file is missing.
 
         Args:
-            config_path: Path to YAML config file. If None, load configs/default.yaml
+            config_path: Path to YAML config file. If None, load the formal
+                normal-conflict scenario config.
             
         Returns:
             Configuration dictionary
         """
         config = ConfigLoader.DEFAULT_CONFIG.copy()
 
-        # When no path given, try configs/default.yaml next to this file
+        # When no path is given, use the formal normal-conflict config.
         if config_path is None:
             _here = os.path.dirname(os.path.abspath(__file__))
-            _fallback = os.path.join(_here, 'configs', 'default.yaml')
+            _fallback = os.path.join(_here, 'configs', 'scenario_normal_30sat_400tar.yaml')
             if os.path.exists(_fallback):
                 config_path = _fallback
 
